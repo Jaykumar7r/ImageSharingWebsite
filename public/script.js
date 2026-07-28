@@ -1,15 +1,33 @@
-const form = document.getElementById("uploadForm");
+async function loadImages(){
 
-form.addEventListener("submit", async (e) => {
+    const response = await fetch("/images");
+    const images = await response.json();
 
-    e.preventDefault();
+    const gallery = document.getElementById("gallery");
 
-    const data = new FormData(form);
+    gallery.innerHTML = "";
 
-    await fetch("/upload", {
-        method: "POST",
-        body: data
+    images.forEach(image => {
+
+        gallery.innerHTML += `
+        <div class="card">
+
+            <img src="/uploads/${image}">
+
+            <br><br>
+
+            <a href="/uploads/${image}" download>
+                <button>Download</button>
+            </a>
+
+        </div>
+        `;
+
     });
+
+}
+
+loadImages();
 
     loadImages();
 });

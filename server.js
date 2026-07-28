@@ -1,3 +1,4 @@
+const ADMIN_PASSWORD = "Seven@77";
 const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
@@ -17,7 +18,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.post("/upload", upload.single("image"), (req, res) => {
+
+  const password = req.headers["admin-password"];
+
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(403).send("Access denied");
+  }
+
   res.send("Image uploaded successfully!");
+
 });
 
 app.get("/images", (req, res) => {
