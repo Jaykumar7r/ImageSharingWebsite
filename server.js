@@ -1,47 +1,44 @@
-const ADMIN_PASSWORD = "Seven@77";
-const express = require("express");
-const multer = require("multer");
-const fs = require("fs");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Upload</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-const app = express();
+    <h1>🔒 Admin Upload</h1>
 
-app.use(express.static("public"));
-app.use("/uploads", express.static("uploads"));
+    <input type="file" id="image">
+    <br><br>
+    <button onclick="uploadImage()">Upload Image</button>
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+    <script>
+        async function uploadImage() {
 
-const upload = multer({ storage });
+            const file = document.getElementById("image").files[0];
 
-app.post("/upload", upload.single("image"), (req, res) => {
+            if (!file) {
+                alert("Please select an image.");
+                return;
+            }
 
-  const password = req.headers["admin-password"];
+            const formData = new FormData();
+            formData.append("image", file);
 
-  if (password !== ADMIN_PASSWORD) {
-    return res.status(403).send("Access denied");
-  }
+            const response = await fetch("/upload", {
+                method: "POST",
+                headers: {
+                    "admin-password": "Seven@77"
+                },
+                body: formData
+            });
 
-  res.send("Image uploaded successfully!");
+            const message = await response.text();
+            alert(message);
+        }
+    </script>
 
-});
-
-app.get("/images", (req, res) => {
-  fs.readdir("uploads", (err, files) => {
-    if (err) return res.json([]);
-    res.json(files);
-  });
-});
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
-});
+</body>
+</html>
