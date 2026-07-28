@@ -1,44 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Upload</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+const ADMIN_PASSWORD = "Seven@77";
 
-    <h1>🔒 Admin Upload</h1>
+const express = require("express");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
-    <input type="file" id="image">
-    <br><br>
-    <button onclick="uploadImage()">Upload Image</button>
+const app = express();
 
-    <script>
-        async function uploadImage() {
+app.use(express.static("public"));
+app.use("/uploads", express.static("uploads"));
 
-            const file = document.getElementById("image").files[0];
+const storage = multer.diskStorage({
+    destination: "uploads/",
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    },
+});
 
-            if (!file) {
-                alert("Please select an image.");
-                return;
-            }
+const upload = multer({ storage });
 
-            const formData = new FormData();
-            formData.append("image", file);
+// Upload image (Admin only)
+app.post("/upload", (req, res) => {
 
-            const response = await fetch("/upload", {
-                method: "POST",
-                headers: {
-                    "admin-password": "Seven@77"
-                },
-                body: formData
-            });
+    const password = req.headers["admin-password"];
 
-            const message = await response.text();
-            alert(message);
+    if (password !== ADMIN_PASSWORD) {
+        return res.status(403).send("Access denied");
+    }
+
+    upload.single("image")(req, res, function (err) {
+
+        if (err) {
+            return res.status(500).send("Upload failed");
         }
-    </script>
 
-</body>
-</html>
+        if (!req.file) {
+            return res.status(400).send("No image selected");
+        }
+
+        res.send("Image uploaded successfully!");
+
+    });
+
+});
+
+// Get all uploaded images
+app.get("/images", (req, res) => {
+
+    fs.readdir("uploads", (err, files) => {
+
+        if (err) {
+            return res.json([]);
+        }
+
+        res.json(files);
+
+    });
+
+});
+
+// Home page
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
+});
