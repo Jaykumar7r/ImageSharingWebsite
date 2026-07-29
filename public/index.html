@@ -1,39 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Upload</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Sharing Website</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h1>Admin Upload Page</h1>
+    <h1>📷 Image Sharing Website</h1>
 
-<input type="file" id="image">
-<button onclick="uploadImage()">Upload</button>
+    <div id="gallery"></div>
 
-<script>
-
-function uploadImage(){
-
-    let file = document.getElementById("image").files[0];
-
-    let formData = new FormData();
-    formData.append("image", file);
-
-    fetch("/upload", {
-        method: "POST",
-        headers: {
-            "admin-password": "Seven@77"
-        },
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => alert(data));
-
-}
-
-</script>
+    <script src="script.js"></script>
 
 </body>
 </html>
