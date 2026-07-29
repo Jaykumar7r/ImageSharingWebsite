@@ -11,8 +11,14 @@
 <input type="file" id="image">
 <button onclick="uploadImage()">Upload</button>
 
+<hr>
+
+<h2>Uploaded Images</h2>
+<div id="gallery"></div>
+
 <script>
-function uploadImage() {
+
+async function uploadImage() {
 
     let file = document.getElementById("image").files[0];
 
@@ -24,16 +30,66 @@ function uploadImage() {
     let formData = new FormData();
     formData.append("image", file);
 
-    fetch("/upload", {
+    const response = await fetch("/upload", {
         method: "POST",
         headers: {
             "admin-password": "Seven@77"
         },
         body: formData
-    })
-    .then(response => response.text())
-    .then(data => alert(data));
+    });
+
+    alert(await response.text());
+
+    loadImages();
 }
+
+async function loadImages() {
+
+    const response = await fetch("/images");
+    const images = await response.json();
+
+    const gallery = document.getElementById("gallery");
+
+    gallery.innerHTML = "";
+
+    images.forEach(image => {
+
+        gallery.innerHTML += `
+            <div class="card">
+                <img src="/uploads/${image}" width="200">
+                <br><br>
+
+                <button onclick="deleteImage('${image}')">
+                    Delete
+                </button>
+
+                <hr>
+            </div>
+        `;
+
+    });
+
+}
+
+async function deleteImage(filename) {
+
+    if (!confirm("Delete this image?")) return;
+
+    const response = await fetch("/delete/" + filename, {
+        method: "DELETE",
+        headers: {
+            "admin-password": "Seven@77"
+        }
+    });
+
+    alert(await response.text());
+
+    loadImages();
+
+}
+
+loadImages();
+
 </script>
 
 </body>

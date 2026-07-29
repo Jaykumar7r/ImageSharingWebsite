@@ -58,7 +58,25 @@ app.get("/images", (req, res) => {
     });
 
 });
+app.delete("/delete/:filename", (req, res) => {
 
+    const password = req.headers["admin-password"];
+
+    if (password !== ADMIN_PASSWORD) {
+        return res.status(403).send("Access denied");
+    }
+
+    const filePath = "uploads/" + req.params.filename;
+
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            return res.status(404).send("Image not found");
+        }
+
+        res.send("Image deleted successfully!");
+    });
+
+});
 // Home page
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
